@@ -2,6 +2,7 @@ name: Build desktop app and Python library
 
 on:
   push:
+    branches: [main]
     tags: ["v*"]
   workflow_dispatch:
 
