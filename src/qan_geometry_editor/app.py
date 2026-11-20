@@ -2,7 +2,7 @@
 from __future__ import annotations
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from qan_geometry import cube, grid, write_obj, write_json, validate_mesh
+from qan_geometry import cube, grid, linear_guideway, write_obj, write_json, validate_mesh
 
 class Editor:
     def __init__(self, root: tk.Tk):
@@ -13,6 +13,7 @@ class Editor:
         bar = tk.Frame(root, padx=8, pady=8); bar.pack(fill="x")
         tk.Button(bar, text="Cube", command=lambda: self.set_mesh(cube(10))).pack(side="left", padx=3)
         tk.Button(bar, text="10 km City Grid", command=lambda: self.set_mesh(grid())).pack(side="left", padx=3)
+        tk.Button(bar, text="Maglev Guideway", command=lambda: self.set_mesh(linear_guideway())).pack(side="left", padx=3)
         tk.Button(bar, text="Export OBJ", command=self.export_obj).pack(side="left", padx=3)
         tk.Button(bar, text="Export QAN JSON", command=self.export_json).pack(side="left", padx=3)
         self.status = tk.StringVar()
