@@ -46,7 +46,8 @@ def _build_prompt_mesh(prompt):
     cx = _integer(text, [r"(?:cells_x|横分割)\s*[:=]?\s*([0-9]+)", r"([0-9]+)\s*[×x]\s*[0-9]+\s*(?:cells|分割)"], 40)
     cy = _integer(text, [r"(?:cells_y|縦分割)\s*[:=]?\s*([0-9]+)", r"[0-9]+\s*[×x]\s*([0-9]+)\s*(?:cells|分割)"], cx)
     if any(k in text for k in ("maglev","guideway","linear","リニア","線路","軌道")):
-        length_match = re.search(r"(?:length|長さ)\s*[:=]?\s*([0-9]+(?:\.[0-9]+)?)\s*(km|m)?|([0-9]+(?:\.[0-9]+)?)\s*(km|m|メートル)?\s*(?:maglev|リニア|線路|軌道)", text, re.IGNORECASE)\n        if length_match:\n            raw = float(length_match.group(1) or length_match.group(3))\n            unit = (length_match.group(2) or length_match.group(4) or "m").lower()\n            length = raw * (1000.0 if unit == "km" else 1.0)\n        else:\n            length = 1000.0
+        length_match = re.search(r"(?:length|長さ)\s*[:=]?\s*([0-9]+(?:\.[0-9]+)?)\s*(km|m)?|([0-9]+(?:\.[0-9]+)?)\s*(km|m|メートル)?\s*(?:maglev|リニア|線路|軌道)", text, re.IGNORECASE)
+        if length_match:\n            raw = float(length_match.group(1) or length_match.group(3))\n            unit = (length_match.group(2) or length_match.group(4) or "m").lower()\n            length = raw * (1000.0 if unit == "km" else 1.0)\n        else:\n            length = 1000.0
         rail_width = _num(text,[r"(?:rail_width|軌道幅|幅)\s*[:=]?\s*([0-9]+(?:\.[0-9]+)?)"],8.0)
         segments = _integer(text,[r"(?:segments|区間|分割)\s*[:=]?\s*([0-9]+)"],20)
         verts, faces, half = [], [], rail_width/2
