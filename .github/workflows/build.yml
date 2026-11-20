@@ -23,6 +23,8 @@ jobs:
   windows-exe:
     needs: test
     runs-on: windows-latest
+    env:
+      DEMO_VERSION: 0.1.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,10 +33,16 @@ jobs:
       - run: python -m pip install --upgrade pip build pyinstaller
       - run: python -m pip install .
       - run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-Geometry-Editor --collect-all qan_geometry src/qan_geometry_editor/app.py
+      - name: Write version information
+        shell: pwsh
+        run: |
+          "QAN Geometry Editor Demo v$env:DEMO_VERSION" | Out-File -FilePath dist/VERSION.txt -Encoding utf8
       - uses: actions/upload-artifact@v4
         with:
-          name: QAN-Geometry-Editor-Windows-x64
-          path: dist/QAN-Geometry-Editor.exe
+          name: QAN-Geometry-Editor-Demo-v${{ github.run_number }}-Windows-x64
+          path: |
+            dist/QAN-Geometry-Editor.exe
+            dist/VERSION.txt
 
   python-library:
     needs: test
