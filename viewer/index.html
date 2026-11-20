@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QAN PI × THIRD CITY × LIGHT MAGLEV — 3D Viewer</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:#07101b;color:#e6f1ff;overflow:hidden}
+#view{position:fixed;inset:0}canvas{display:block}
+.panel{position:fixed;z-index:2;background:#091827dc;border:1px solid #31516b;border-radius:12px;backdrop-filter:blur(12px);box-shadow:0 10px 35px #0007}
+#head{top:14px;left:14px;padding:14px 17px;max-width:min(560px,calc(100vw - 28px))}
+h1{font-size:15px;letter-spacing:.08em;margin:0 0 6px}p{font-size:12px;color:#9fb5ca;margin:0;line-height:1.5}
+#controls{left:14px;bottom:14px;padding:13px;width:min(330px,calc(100vw - 28px));display:grid;gap:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:#c4d6e6}
+button{background:#12304a;color:#e8f5ff;border:1px solid #47728f;border-radius:8px;padding:8px 12px;cursor:pointer}button:hover{background:#1b4969}
+input{width:130px;accent-color:#63d8ff}#stats{right:14px;top:14px;padding:12px 14px;min-width:170px;font-size:11px;color:#a9bfd2;line-height:1.8}
+strong{color:#dff7ff}#hint{position:fixed;bottom:18px;right:16px;color:#829bb0;font-size:11px;text-align:right}
+@media(max-width:650px){#stats{top:auto;bottom:190px;right:14px;min-width:135px}#hint{display:none}}
+</style>
+</head>
+<body><div id="view"></div>
+<section class="panel" id="head"><h1>QAN PI × THIRD CITY × LIGHT MAGLEV</h1><p>Procedural 10 km × 10 km science-fiction city reference • quad terrain • instanced low-poly blocks • animated guideway train<br>Visual simulation only — not certified railway or structural engineering data.</p></section>
+<section class="panel" id="stats"><strong>LIVE SCENE TELEMETRY</strong><br><span id="telemetry">Building scene…</span></section>
+<section class="panel" id="controls">
+<div class="row"><strong>MAGLEV CONTROL</strong><button id="toggle">Pause train</button></div>
+<div class="row"><label for="speed">Train speed</label><input id="speed" type="range" min="0" max="3" step=".1" value="1"><span id="speedval">1.0×</span></div>
+<div class="row"><label for="density">City density</label><input id="density" type="range" min="0.35" max="1.5" step=".05" value="1"></div>
+<div class="row"><button id="reset">Reset camera</button><button id="lights">Night / day</button></div>
+</section><div id="hint">Drag: orbit · Right-drag: pan · Wheel: zoom</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const PI=Math.PI, TAU=2*PI, QAN_PI={pi:PI,tau:TAU,degToRad:d=>d*PI/180};
+const mount=document.querySelector('#view'),scene=new THREE.Scene();scene.background=new THREE.Color(0x07101b);scene.fog=new THREE.FogExp2(0x07101b,.000085);
+const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,1,50000);camera.position.set(8500,7200,10500);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;mount.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,0,0);controls.enableDamping=true;controls.maxDistance=23000;controls.minDistance=1200;
+scene.add(new THREE.HemisphereLight(0x9bcfff,0x172332,1.6));const sun=new THREE.DirectionalLight(0xc3e4ff,2.1);sun.position.set(-4500,9000,3000);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
+const groundMat=new THREE.MeshStandardMaterial({color:0x182a31,roughness:1}),ground=new THREE.Mesh(new THREE.PlaneGeometry(10000,10000,100,100),groundMat);ground.rotation.x=-PI/2;ground.position.y=-8;ground.receiveShadow=true;scene.add(ground);
+const grid=new THREE.GridHelper(10000,40,0x31556b,0x1b3445);grid.position.y=-5;scene.add(grid);
+// Original mountain ridges around the city perimeter.
+const ridgeMat=new THREE.MeshStandardMaterial({color:0x263d49,roughness:1});
+for(let i=0;i<28;i++){const a=i/28*TAU,r=6100+(i%3)*240,h=500+(i%5)*170;const m=new THREE.Mesh(new THREE.ConeGeometry(550,h,5),ridgeMat);m.position.set(Math.cos(a)*r,h/2-15,Math.sin(a)*r);m.rotation.y=a;m.receiveShadow=true;scene.add(m);}
+// City districts: repeated low-poly blocks via instancing, arranged in rings with green buffers.
+const buildingMat=new THREE.MeshStandardMaterial({color:0x416477,metalness:.28,roughness:.62}),glassMat=new THREE.MeshStandardMaterial({color:0x78cde0,emissive:0x0a2935,metalness:.55,roughness:.25});
+const baseGeo=new THREE.BoxGeometry(1,1,1);let buildingCount=0;
+function makeDistrict(density=1){for(const obj of [...scene.children].filter(o=>o.userData.city)){scene.remove(obj);obj.geometry?.dispose?.();}
+ const total=Math.floor(900*density),inst=new THREE.InstancedMesh(baseGeo,buildingMat,total),dummy=new THREE.Object3D();
+ for(let i=0;i<total;i++){const angle=Math.random()*TAU,rad=350+Math.sqrt(Math.random())*4300;const x=Math.cos(angle)*rad,z=Math.sin(angle)*rad;
+ const districtGap=(Math.abs(x)<500&&Math.abs(z)<500);const w=45+Math.random()*95,h=55+Math.random()*Math.max(80,680*(1-rad/6000)),dep=45+Math.random()*95;
+ dummy.position.set(x,h/2-5,z);dummy.scale.set(w,h,dep);dummy.rotation.y=Math.random()*PI;dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix);}
+ inst.instanceMatrix.needsUpdate=true;inst.userData.city=true;inst.castShadow=true;inst.receiveShadow=true;scene.add(inst);buildingCount=total;
+ const towers=new THREE.Group();towers.userData.city=true;
+ for(let i=0;i<22;i++){const a=i/22*TAU,x=Math.cos(a)*1100,z=Math.sin(a)*1100,h=650+(i%6)*130;const b=new THREE.Mesh(new THREE.BoxGeometry(100,h,100),glassMat);b.position.set(x,h/2,z);towers.add(b);}scene.add(towers);
+}
+makeDistrict(1);
+// Park green belts and water reservoir.
+const parkMat=new THREE.MeshStandardMaterial({color:0x1d503f,roughness:1});
+for(let i=0;i<8;i++){const p=new THREE.Mesh(new THREE.CircleGeometry(240+i*14,32),parkMat);p.rotation.x=-PI/2;p.position.set(Math.cos(i*TAU/8)*2600,-2,Math.sin(i*TAU/8)*2600);scene.add(p);}
+const water=new THREE.Mesh(new THREE.CircleGeometry(410,64),new THREE.MeshStandardMaterial({color:0x124c68,metalness:.45,roughness:.2}));water.rotation.x=-PI/2;water.position.set(-1750,-1,1200);scene.add(water);
+// Elevated closed-loop guideway with four broad curves and straight sections.
+const R=2800,half=3100,yRail=190,pts=[];pts.push(new THREE.Vector3(-half,yRail,-R));pts.push(new THREE.Vector3(half,yRail,-R));
+for(let i=0;i<=48;i++){const a=-PI/2+i/48*PI;pts.push(new THREE.Vector3(half+R*Math.cos(a),yRail,R*Math.sin(a)));}
+pts.push(new THREE.Vector3(-half,yRail,R));
+for(let i=0;i<=48;i++){const a=PI/2+i/48*PI;pts.push(new THREE.Vector3(-half+R*Math.cos(a),yRail,R*Math.sin(a)));}
+const path=new THREE.CatmullRomCurve3(pts,true,'centripetal');const railMat=new THREE.MeshStandardMaterial({color:0x8ba6b6,metalness:.8,roughness:.25}),beam=new THREE.Mesh(new THREE.TubeGeometry(path,500,24,8,true),railMat);beam.castShadow=true;scene.add(beam);
+const glowRail=new THREE.Mesh(new THREE.TubeGeometry(path,500,4,6,true),new THREE.MeshBasicMaterial({color:0x4bdcff}));glowRail.position.y=12;scene.add(glowRail);
+// Piers placed along the loop.
+const pierMat=new THREE.MeshStandardMaterial({color:0x526879,metalness:.55,roughness:.4});for(let i=0;i<100;i++){const p=path.getPointAt(i/100);const pier=new THREE.Mesh(new THREE.BoxGeometry(48,190,48),pierMat);pier.position.set(p.x,85,p.z);scene.add(pier);}
+// Stations with platforms, concourses and roof canopies.
+for(const t of [.12,.37,.62,.87]){const p=path.getPointAt(t),station=new THREE.Group();station.position.set(p.x,yRail+35,p.z);station.rotation.y=Math.atan2(path.getTangentAt(t).x,path.getTangentAt(t).z);const platform=new THREE.Mesh(new THREE.BoxGeometry(520,18,190),new THREE.MeshStandardMaterial({color:0x294d63,metalness:.5}));station.add(platform);const roof=new THREE.Mesh(new THREE.BoxGeometry(500,16,210),new THREE.MeshStandardMaterial({color:0x75a8bd,metalness:.6,roughness:.25}));roof.position.y=115;station.add(roof);scene.add(station);}
+// Train assembly aligned to tangent each frame.
+const train=new THREE.Group();const shell=new THREE.Mesh(new THREE.BoxGeometry(310,92,112),new THREE.MeshStandardMaterial({color:0xd9e9ed,metalness:.72,roughness:.22}));shell.position.y=45;train.add(shell);
+const nose=new THREE.Mesh(new THREE.CapsuleGeometry(55,205,6,12),new THREE.MeshStandardMaterial({color:0x9bd9e8,metalness:.6,roughness:.2}));nose.rotation.z=PI/2;nose.scale.set(.55,.78,1);nose.position.set(0,48,0);train.add(nose);
+const stripe=new THREE.Mesh(new THREE.BoxGeometry(315,10,116),new THREE.MeshBasicMaterial({color:0x21c9ff}));stripe.position.y=40;train.add(stripe);
+for(let i=0;i<8;i++){const win=new THREE.Mesh(new THREE.BoxGeometry(25,24,3),new THREE.MeshStandardMaterial({color:0x071c2c,emissive:0x0b4059,metalness:.5}));win.position.set(-105+i*30,63,57);train.add(win);}
+scene.add(train);
+const trainLight=new THREE.PointLight(0x3edaff,3,500);trainLight.position.set(0,75,0);train.add(trainLight);
+// Trackside beacons
+for(let i=0;i<48;i++){const p=path.getPointAt(i/48);const beacon=new THREE.Mesh(new THREE.SphereGeometry(13,8,8),new THREE.MeshBasicMaterial({color:0x43ddff}));beacon.position.set(p.x,235,p.z);scene.add(beacon);}
+let running=true,progress=0,speed=1,night=false,last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;if(running)progress=(progress+dt*.018*speed)%1;const pos=path.getPointAt(progress),tan=path.getTangentAt(progress);train.position.copy(pos);train.position.y+=18;train.rotation.y=Math.atan2(tan.x,tan.z);train.rotation.z=-tan.y;controls.update();renderer.render(scene,camera);document.querySelector('#telemetry').innerHTML='QAN π: '+QAN_PI.pi.toFixed(8)+'<br>Track loop: '+(path.getLength()/1000).toFixed(2)+' km<br>Buildings: '+buildingCount+' (instanced)<br>Train: '+(running?'IN MOTION':'PAUSED')+'<br>Speed factor: '+speed.toFixed(1)+'×';}
+requestAnimationFrame(frame);
+document.querySelector('#toggle').onclick=e=>{running=!running;e.target.textContent=running?'Pause train':'Resume train';};
+document.querySelector('#speed').oninput=e=>{speed=+e.target.value;document.querySelector('#speedval').textContent=speed.toFixed(1)+'×';};
+document.querySelector('#density').onchange=e=>makeDistrict(+e.target.value);
+document.querySelector('#reset').onclick=()=>{camera.position.set(8500,7200,10500);controls.target.set(0,0,0);controls.update();};
+document.querySelector('#lights').onclick=()=>{night=!night;scene.background.set(night?0x020611:0x07101b);scene.fog.color.set(night?0x020611:0x07101b);sun.intensity=night?.45:2.1;buildingMat.emissive=new THREE.Color(night?0x102c40:0x000000);};
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>
