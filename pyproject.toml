@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qan-geometry"
+version = "0.1.0"
+description = "Lightweight quad-first geometry primitives and exporters for QAN Geometry Editor."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Independent Developer" }]
+keywords = ["geometry", "quad-mesh", "3d", "obj", "qan"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Multimedia :: Graphics :: 3D Modeling",
+]
+[project.scripts]
+qan-geometry = "qan_geometry.cli:main"
+qan-geometry-editor = "qan_geometry_editor.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
