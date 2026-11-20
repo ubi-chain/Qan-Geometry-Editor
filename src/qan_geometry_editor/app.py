@@ -7,7 +7,7 @@ from qan_geometry import cube, grid, linear_guideway, write_obj, write_json, val
 class Editor:
     def __init__(self, root: tk.Tk):
         self.root = root
-        root.title("QAN Geometry Editor 0.1.0")
+        root.title("QAN Geometry Editor 0.2.0")
         root.geometry("900x650")
         self.mesh = cube(10)
         bar = tk.Frame(root, padx=8, pady=8); bar.pack(fill="x")
