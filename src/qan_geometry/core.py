@@ -50,6 +50,31 @@ def grid(width: float = 10000, depth: float = 10000, cells_x: int = 100,
     return Mesh(name, vertices, faces)
 
 
+def linear_guideway(length: float = 1000, width: float = 8, segments: int = 20,
+                    name: str = "Concept Maglev Guideway") -> Mesh:
+    """Create a lightweight segmented guideway reference slab; not an engineering design."""
+    if length <= 0 or width <= 0 or segments < 1:
+        raise ValueError("length/width and segments must be positive")
+    vertices: list[Vec3] = []
+    faces: list[Face] = []
+    half = width / 2
+    for i in range(segments + 1):
+        x = -length / 2 + length * i / segments
+        vertices.extend([(x, -half, 0), (x, half, 0), (x, -half, -0.6), (x, half, -0.6)])
+    for i in range(segments):
+        a = i * 4
+        b = a + 4
+        faces.extend([
+            (a, a+1, b+1, b),
+            (a+2, b+2, b+3, a+3),
+            (a, b, b+2, a+2),
+            (a+1, a+3, b+3, b+1),
+        ])
+    # Close both ends with quad faces.
+    faces.extend([(0, 2, 3, 1), (segments*4, segments*4+1, segments*4+3, segments*4+2)])
+    return Mesh(name, vertices, faces)
+
+
 def validate_mesh(mesh: Mesh) -> dict:
     n = len(mesh.vertices)
     invalid = [i for i, f in enumerate(mesh.faces)
