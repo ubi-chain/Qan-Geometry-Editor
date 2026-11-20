@@ -70,3 +70,13 @@ This is an early geometry prototype, not a complete CAD or railway engineering t
 ## License
 
 Source code: MIT (see `LICENSE`). Documentation: CC BY 4.0 (see `docs/LICENSE-DOCS.md`).
+
+
+## Interactive 3D viewer
+
+A live browser scene with an animated light-maglev train, procedural Third-City-inspired city blocks, elevated guideway, orbit/pan/zoom controls, speed control, density control and day/night toggle.
+
+- [Open viewer source](viewer/index.html)
+- [Viewer documentation](docs/third-city-maglev-viewer.md)
+
+To preview locally, run `python -m http.server 8000` from the repository root and open `http://localhost:8000/viewer/`. For a public URL, enable GitHub Pages with the repository root as the publishing source.
