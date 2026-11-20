@@ -1,0 +1,1 @@
+Free, quad-first 3D geometry editor using QAN PI. Develops optimized lightweight reference models for a fictional 10 km × 10 km Third-City-inspired environment and a conceptual linear/maglev system. Supports editable 3D input/output and progressive LOD. Visualization reference only; not engineering-certified.
