@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QAN PI — Sunset City Reconstruction</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,"Noto Sans JP",sans-serif}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100d18;color:#f4e8df}
+#view{position:fixed;inset:0}canvas{display:block}
+#hud{position:fixed;left:18px;top:16px;max-width:min(420px,calc(100vw - 36px));padding:14px 16px;background:#130f19cc;border:1px solid #ffb27a55;border-radius:12px;backdrop-filter:blur(12px);pointer-events:none}
+#hud h1{font-size:14px;letter-spacing:.13em;margin:0 0 6px;color:#ffd0a2}#hud p{font-size:11px;line-height:1.55;margin:0;color:#e7cfc0}
+#controls{position:fixed;right:18px;top:16px;width:230px;padding:13px;background:#130f19dd;border:1px solid #ffb27a55;border-radius:12px;backdrop-filter:blur(12px)}
+#controls button{background:#3b2930;color:#ffe8d6;border:1px solid #d58c68;border-radius:7px;padding:8px 10px;margin:3px;cursor:pointer}
+#controls button:hover{background:#65404a}#controls label{display:block;font-size:11px;color:#e7cfc0;margin:10px 2px 4px}
+#controls input{width:100%;accent-color:#ffad73}#stats{font-size:10px;color:#d6b7a7;line-height:1.6;margin:8px 2px}
+#hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);padding:8px 12px;background:#130f19bb;border-radius:9px;color:#ead1c1;font-size:11px;white-space:nowrap}
+@media(max-width:650px){#controls{top:auto;bottom:50px;right:10px;width:185px}#hud{left:10px;top:10px}#hint{bottom:10px;font-size:9px}}
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="hud"><h1>QAN PI / SUNSET CITY</h1><p>Single-image inspired procedural reconstruction · people excluded<br>360° orbit / polygon architecture / radial city layout</p></div>
+<div id="controls">
+  <button id="home">視点リセット</button><button id="spin">自動旋回 OFF</button>
+  <label>旋回速度 <span id="speedv">0.12</span></label><input id="speed" type="range" min="0.02" max="0.5" step="0.01" value="0.12">
+  <label>都市密度 <span id="densityv">1.0</span></label><input id="density" type="range" min="0.4" max="1.5" step="0.1" value="1">
+  <label>ポリゴン表示</label><button id="wire">ワイヤーフレーム OFF</button><button id="sunset">夕焼け ON</button>
+  <div id="stats">QAN π = 3.141592653589793<br>QAN τ = 6.283185307179586<br>Initializing…</div>
+</div>
+<div id="hint">ドラッグ：全角度回転　ホイール：ズーム　右ドラッグ：平行移動</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const QAN_PI=3.141592653589793, QAN_TAU=2*QAN_PI;
+const root=document.querySelector('#view');
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x281b2b); scene.fog=new THREE.FogExp2(0x7c3c3c,0.00135);
+const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,2500);camera.position.set(145,95,205);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;root.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,22,-65);controls.enableDamping=true;controls.dampingFactor=.055;controls.minDistance=30;controls.maxDistance=650;controls.maxPolarAngle=QAN_PI*.49;
+scene.add(new THREE.HemisphereLight(0xffc7a0,0x20243a,2.0));
+const sunLight=new THREE.DirectionalLight(0xffa66e,3.2);sunLight.position.set(-170,130,-180);sunLight.castShadow=true;sunLight.shadow.mapSize.set(2048,2048);sunLight.shadow.camera.left=-260;sunLight.shadow.camera.right=260;sunLight.shadow.camera.top=260;sunLight.shadow.camera.bottom=-260;scene.add(sunLight);
+const fill=new THREE.PointLight(0xff754d,170,500);fill.position.set(-125,40,-80);scene.add(fill);
+function mat(color,rough=.82,metal=0){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});}
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(900,900),mat(0x342b36));ground.rotation.x=-QAN_PI/2;ground.position.y=-1;ground.receiveShadow=true;scene.add(ground);
+// Sky gradient generated from the reference palette, deliberately excluding the source photo and its people.
+const skyCanvas=document.createElement('canvas');skyCanvas.width=4;skyCanvas.height=256;const ctx=skyCanvas.getContext('2d');const grad=ctx.createLinearGradient(0,0,0,256);grad.addColorStop(0,'#201b30');grad.addColorStop(.28,'#773c4a');grad.addColorStop(.56,'#e65e3e');grad.addColorStop(.78,'#ffb15c');grad.addColorStop(1,'#ffcf85');ctx.fillStyle=grad;ctx.fillRect(0,0,4,256);const skyTex=new THREE.CanvasTexture(skyCanvas);skyTex.colorSpace=THREE.SRGBColorSpace;const sky=new THREE.Mesh(new THREE.SphereGeometry(850,32,20),new THREE.MeshBasicMaterial({map:skyTex,side:THREE.BackSide,depthWrite:false}));scene.add(sky);
+// Distant ridges
+function ridge(points,color,depth){const shape=new THREE.Shape();shape.moveTo(points[0][0],0);for(const p of points)shape.lineTo(p[0],p[1]);shape.lineTo(points[points.length-1][0],0);const geo=new THREE.ShapeGeometry(shape,32);const m=new THREE.Mesh(geo,mat(color));m.position.z=depth;m.position.y=1;m.receiveShadow=true;scene.add(m);}
+ridge([[-420,25],[-340,45],[-270,28],[-190,58],[-100,35],[0,64],[90,38],[180,55],[270,30],[350,48],[430,20]],0x382735,-255);
+// Mountain as radial polygon mesh; QAN PI controls angular sampling and snow line.
+function coneSurface(radius,height,segments,topY,material,offset=0){const g=new THREE.BufferGeometry(),v=[],idx=[];for(let j=0;j<=24;j++){const t=j/24;const r=radius*(1-t);const y=height*t;for(let i=0;i<=segments;i++){const a=QAN_TAU*i/segments;const wobble=1+.018*Math.sin(a*7)+.012*Math.cos(a*11);v.push(Math.cos(a)*r*wobble,y,Math.sin(a)*r*wobble);}}for(let j=0;j<24;j++)for(let i=0;i<segments;i++){const a=j*(segments+1)+i,b=a+segments+1;idx.push(a,b,a+1,b,b+1,a+1);}g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(idx);g.computeVertexNormals();const mesh=new THREE.Mesh(g,material);mesh.position.set(150,0,-205);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;}
+coneSurface(72,68,72,0,mat(0x382b32),0);
+const snowMat=new THREE.MeshStandardMaterial({color:0xe9c5b5,roughness:1,side:THREE.DoubleSide});
+function snowCap(){const g=new THREE.BufferGeometry(),v=[],idx=[],segments=72,rings=9;for(let j=0;j<=rings;j++){const t=j/rings,r=29*(1-t),y=68*t;for(let i=0;i<=segments;i++){const a=QAN_TAU*i/segments;v.push(Math.cos(a)*r,y+Math.sin(a*5)*1.0,Math.sin(a)*r);}}for(let j=0;j<rings;j++)for(let i=0;i<segments;i++){const a=j*(segments+1)+i,b=a+segments+1;idx.push(a,b,a+1,b,b+1,a+1);}g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(idx);g.computeVertexNormals();const m=new THREE.Mesh(g,snowMat);m.position.set(150,0,-205);scene.add(m);}snowCap();
+// Sun disc and halo
+const sun=new THREE.Mesh(new THREE.SphereGeometry(8,24,16),new THREE.MeshBasicMaterial({color:0xffe6a2}));sun.position.set(-155,45,-230);scene.add(sun);const halo=new THREE.Mesh(new THREE.SphereGeometry(12,24,16),new THREE.MeshBasicMaterial({color:0xffa35f,transparent:true,opacity:.18,depthWrite:false}));halo.position.copy(sun.position);scene.add(halo);
+// City blocks: deterministic QAN PI radial + orthogonal street layout, batched by height tiers.
+const windowCanvas=document.createElement('canvas');windowCanvas.width=64;windowCanvas.height=128;const wx=windowCanvas.getContext('2d');wx.fillStyle='#302a34';wx.fillRect(0,0,64,128);for(let y=5;y<124;y+=12)for(let x=5;x<60;x+=11){wx.fillStyle=((x*3+y*7)%9<5)?'#ffc88e':'#604c4c';wx.fillRect(x,y,5,7);}const windowTex=new THREE.CanvasTexture(windowCanvas);windowTex.colorSpace=THREE.SRGBColorSpace;windowTex.wrapS=windowTex.wrapT=THREE.RepeatWrapping;windowTex.repeat.set(1,1);
+const buildingMat=new THREE.MeshStandardMaterial({map:windowTex,roughness:.74,metalness:.12});const buildingGeo=new THREE.BoxGeometry(1,1,1);const maxBuildings=850;const buildings=new THREE.InstancedMesh(buildingGeo,buildingMat,maxBuildings);buildings.castShadow=true;buildings.receiveShadow=true;scene.add(buildings);
+let buildingRecords=[];let seed=2411;function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
+const dummy=new THREE.Object3D();let count=0;
+for(let z=-185;z<105;z+=13){for(let x=-230;x<230;x+=13){const radial=Math.sqrt(x*x+(z+35)*(z+35));if(radial<24||radial>285)continue;const angle=Math.atan2(x,z+35);const ringBias=(Math.cos(angle*4)+1)*.5;const h=7+rand()*18+ringBias*rand()*24;const w=5+rand()*5;const d=5+rand()*5;const xx=x+(rand()-.5)*4,zz=z+(rand()-.5)*4;buildingRecords.push({x:xx,z:zz,w,h,d});}}
+function rebuildCity(density){count=0;const step=Math.max(1,Math.round(1/density));for(let k=0;k<buildingRecords.length;k+=step){const b=buildingRecords[k];dummy.position.set(b.x,b.h/2,b.z);dummy.scale.set(b.w,b.h,b.d);dummy.rotation.y=(rand()-.5)*.12;dummy.updateMatrix();buildings.setMatrixAt(count++,dummy.matrix);}buildings.count=count;buildings.instanceMatrix.needsUpdate=true;document.querySelector('#densityv').textContent=density.toFixed(1);stats();}
+rebuildCity(1);
+// Signature twin towers
+function tower(x,z,h,w,d){const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(0x55434a,.5,.35));body.position.set(x,h/2,z);body.castShadow=true;scene.add(body);const glow=new THREE.Mesh(new THREE.BoxGeometry(w*.82,h*.9,d+.08),new THREE.MeshBasicMaterial({map:windowTex,color:0xffd0a0}));glow.position.set(x,h*.52,z);scene.add(glow);const crown=new THREE.Mesh(new THREE.BoxGeometry(w*1.08,2,d*1.08),mat(0x9b5b4e,.4,.5));crown.position.set(x,h+1,z);scene.add(crown);}
+tower(14,-82,112,15,14);tower(33,-82,126,15,14);
+for(let i=0;i<4;i++){const p=new THREE.Mesh(new THREE.BoxGeometry(3,62+i*4,3),mat(0x9b6556,.35,.6));p.position.set(-145+i*14,31+i*2,-115);p.castShadow=true;scene.add(p);}
+// Elevated observation terrace, floor and empty railing only — no human meshes.
+const terrace=new THREE.Mesh(new THREE.BoxGeometry(480,2,38),mat(0x9b5849));terrace.position.set(0,4,130);terrace.receiveShadow=true;scene.add(terrace);
+const railMat=mat(0x332a32,.35,.65);function railBar(x,y,z,sx,sy,sz){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),railMat);o.position.set(x,y,z);o.castShadow=true;scene.add(o);}
+railBar(0,14,111,480,1.4,1.4);railBar(0,7,111,480,.8,.8);for(let x=-235;x<=235;x+=12)railBar(x,10.5,111,.65,7,.65);
+// Terrace support columns and low-poly light fixtures
+for(let x=-210;x<=210;x+=70){const c=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.8,13,6),mat(0x544047));c.position.set(x,-3,128);scene.add(c);}
+const wireMats=[];scene.traverse(o=>{if(o.isMesh&&o.material&&o.material.wireframe!==undefined)wireMats.push(o.material);});
+let wire=false,auto=false,speed=.12,sunset=true;function stats(){document.querySelector('#stats').innerHTML='QAN π = '+QAN_PI.toFixed(15)+'<br>QAN τ = '+QAN_TAU.toFixed(15)+'<br>Buildings: '+count+' instanced<br>Draw mode: '+(wire?'wireframe':'solid')+' · People: 0';}
+document.querySelector('#speed').addEventListener('input',e=>{speed=+e.target.value;document.querySelector('#speedv').textContent=speed.toFixed(2);});
+document.querySelector('#density').addEventListener('input',e=>rebuildCity(+e.target.value));
+document.querySelector('#home').onclick=()=>{camera.position.set(145,95,205);controls.target.set(0,22,-65);controls.update();};
+document.querySelector('#spin').onclick=e=>{auto=!auto;e.target.textContent='自動旋回 '+(auto?'ON':'OFF');};
+document.querySelector('#wire').onclick=e=>{wire=!wire;scene.traverse(o=>{if(o.isMesh&&o.material&&'wireframe'in o.material)o.material.wireframe=wire;});e.target.textContent='ワイヤーフレーム '+(wire?'ON':'OFF');stats();};
+document.querySelector('#sunset').onclick=e=>{sunset=!sunset;scene.fog.color.set(sunset?0x7c3c3c:0x8798aa);scene.background.set(sunset?0x281b2b:0x91a9bd);sunLight.color.set(sunset?0xffa66e:0xffffff);sunLight.intensity=sunset?3.2:2.1;e.target.textContent='夕焼け '+(sunset?'ON':'OFF');};
+function animate(){requestAnimationFrame(animate);if(auto){const offset=camera.position.clone().sub(controls.target);const a=speed*.0025;const x=offset.x*Math.cos(a)-offset.z*Math.sin(a),z=offset.x*Math.sin(a)+offset.z*Math.cos(a);camera.position.set(controls.target.x+x,camera.position.y,controls.target.z+z);}controls.update();renderer.render(scene,camera);}animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+stats();
+</script></body></html>
