@@ -2,7 +2,7 @@
 
 Free, quad-first 3D geometry editor and lightweight geometry library using QAN PI concepts. The prototype focuses on editable quad meshes, validation summaries, and exportable reference geometry for a fictional 10 km × 10 km Third-City-inspired environment and a conceptual linear/maglev system.
 
-**Version:** 0.2.0 (prototype)  
+**Version:** 0.3.0 (prototype)  
 **Code license:** MIT  
 **Documentation:** CC BY 4.0  
 **Author:** Independent Developer
@@ -16,6 +16,7 @@ Free, quad-first 3D geometry editor and lightweight geometry library using QAN P
 - Export to Wavefront OBJ and QAN Geometry JSON.
 - Command-line generator.
 - Browser-based Three.js viewer with animated conceptual maglev train.
+- Blender-inspired QAN Studio WebGL workspace with scene collection, transform gizmos, object tools, prompt-based primitive generation, viewport display modes, and OBJ/QAN JSON export.
 - Blender add-on: import/export QAN quad-mesh JSON and generate supported geometry from Japanese/English prompts.
 - GitHub Actions workflow builds a Windows x64 executable and Python wheel/sdist artifacts.
 
@@ -76,6 +77,12 @@ write_obj(mesh, "cube.obj")
 
 terrain = grid(width=10_000, depth=10_000, cells_x=100, cells_y=100)
 ```
+
+## QAN Studio — Blender-inspired WebGL editor
+
+Open [QAN Studio](viewer/editor.html) for the dark 3D workspace. It includes a scene collection, object creation, orbit/pan/zoom, move/rotate/scale gizmos, numeric transforms, solid/wireframe/X-Ray display, edge and vertex overlays, constrained prompt generation, and OBJ/QAN JSON export. See [Studio editor documentation](docs/studio-editor.md) for setup and limitations.
+
+Run `python -m http.server 8000` from the repository root and visit `http://localhost:8000/viewer/editor.html`. Three.js is loaded from jsDelivr, so an internet connection is required.
 
 ## Interactive 3D viewer
 
