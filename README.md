@@ -101,3 +101,13 @@ This is an early geometry prototype, not a complete CAD or railway engineering t
 ## License
 
 Source code: MIT (see LICENSE). Documentation: CC BY 4.0 (see docs/LICENSE-DOCS.md).
+
+
+## QAN PI Sunset City reconstruction (people-free)
+
+A procedural Three.js scene reconstructs the supplied sunset-city wallpaper as editable polygonal scene elements, intentionally omitting all people. It includes a polygonal mountain and snow cap, sunset sky, sun, dense city blocks, landmark towers, and an empty observation terrace with railings. QAN PI / tau are used for angular sampling, radial city layout, and orbit calculations.
+
+- [Open the 360-degree WebGL viewer source](viewer/wallpaper-3d.html)
+- [Reconstruction notes and controls](docs/sunset-city-reconstruction.md)
+
+Run `python -m http.server 8000` from the repository root and visit `http://localhost:8000/viewer/wallpaper-3d.html`. The page loads Three.js from jsDelivr, so an internet connection is required. This is a stylized interpretation from one 2D image; hidden surfaces and exact depth are inferred, not photogrammetrically recovered.
