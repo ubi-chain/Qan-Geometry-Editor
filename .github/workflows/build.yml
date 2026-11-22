@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -36,13 +36,40 @@ jobs:
       - name: Write version information
         shell: pwsh
         run: |
-          "QAN Geometry Editor Demo v$env:DEMO_VERSION" | Out-File -FilePath dist/VERSION.txt -Encoding utf8
+          "QAN Geometry Editor Preview v$env:DEMO_VERSION" | Out-File -FilePath dist/VERSION.txt -Encoding utf8
       - uses: actions/upload-artifact@v4
         with:
           name: QAN-Geometry-Editor-Demo-v${{ github.run_number }}-Windows-x64
           path: |
             dist/QAN-Geometry-Editor.exe
             dist/VERSION.txt
+
+  publish-windows-release:
+    needs: windows-exe
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: QAN-Geometry-Editor-Demo-v*-Windows-x64
+          path: release-assets
+          merge-multiple: true
+      - name: Publish latest Windows executable
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          target_commitish: ${{ github.sha }}
+          name: QAN Geometry Editor - Latest Windows Preview
+          prerelease: true
+          make_latest: false
+          overwrite_files: true
+          files: |
+            release-assets/QAN-Geometry-Editor.exe
+            release-assets/VERSION.txt
+          body: |
+            Windows x64 desktop preview build of QAN Geometry Editor.
+            This executable packages the lightweight Tkinter quad-mesh editor.
+            It is separate from the browser-based Three.js Studio.
 
   python-library:
     needs: test
