@@ -118,3 +118,8 @@ A procedural Three.js scene reconstructs the supplied sunset-city wallpaper as e
 - [Reconstruction notes and controls](docs/sunset-city-reconstruction.md)
 
 Run `python -m http.server 8000` from the repository root and visit `http://localhost:8000/viewer/wallpaper-3d.html`. The page loads Three.js from jsDelivr, so an internet connection is required. This is a stylized interpretation from one 2D image; hidden surfaces and exact depth are inferred, not photogrammetrically recovered.
+
+
+## Windows executable
+
+A Windows x64 desktop preview build is published from GitHub Actions. After a successful `main` build, download `QAN-Geometry-Editor.exe` from the [latest Windows preview release](https://github.com/ubi-chain/Qan-Geometry-Editor/releases/tag/latest). This desktop executable packages the lightweight Tkinter quad-mesh editor (`src/qan_geometry_editor/app.py`); it is separate from the browser-based Three.js Studio at `viewer/editor.html`. The first launch may be flagged by Windows SmartScreen because the build is not code-signed.
