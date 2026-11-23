@@ -21,3 +21,19 @@ class GeometryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+from qan_geometry import PI, TAU, ring_points, helix_points, circle_circumference, circle_area
+
+class QanPiTests(unittest.TestCase):
+    def test_pi_circle_math(self):
+        self.assertAlmostEqual(TAU, 2 * PI)
+        self.assertAlmostEqual(circle_circumference(2), 4 * PI)
+        self.assertAlmostEqual(circle_area(2), 4 * PI)
+
+    def test_ring_and_helix_sampling(self):
+        ring = ring_points(10, segments=36)
+        self.assertEqual(len(ring), 37)
+        self.assertEqual(ring[0], ring[-1])
+        helix = helix_points(5, pitch=2, turns=1, segments_per_turn=24)
+        self.assertEqual(len(helix), 25)
+        self.assertAlmostEqual(helix[-1][1], 2)
