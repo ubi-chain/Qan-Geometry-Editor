@@ -123,3 +123,30 @@ Run `python -m http.server 8000` from the repository root and visit `http://loca
 ## Windows executable
 
 A Windows x64 desktop preview build is published from GitHub Actions. After a successful `main` build, download `QAN-Geometry-Editor.exe` from the [latest Windows preview release](https://github.com/ubi-chain/Qan-Geometry-Editor/releases/tag/latest). This desktop executable packages the lightweight Tkinter quad-mesh editor (`src/qan_geometry_editor/app.py`); it is separate from the browser-based Three.js Studio at `viewer/editor.html`. The first launch may be flagged by Windows SmartScreen because the build is not code-signed.
+
+
+## QAN PI × Tokyo EVA City
+
+Open [Tokyo EVA City 3D Observer](viewer/tokyo-eva-city.html) for a WebGL observation scene with QAN PI elevated ring roads, radial bridges, Tama terrain, and an island inset. The 23-ward boundary shape is loaded from an OSM-derived TopoJSON dataset. Building masses are generated for a lightweight visualization; proposed viaducts are conceptual and are not existing infrastructure. Tama and island geometry is schematic, not at true scale. See [Tokyo EVA City scope and sources](docs/tokyo-eva-city.md).
+
+### QAN PI helpers
+
+The Python package now exposes `PI`, `TAU`, degree/radian conversion, polar coordinates, circular ring sampling, helix sampling, circumference, and circle area.
+
+```python
+from qan_geometry import ring_points, helix_points, circle_circumference
+
+ring = ring_points(radius=9000, segments=720, y=2000)
+ramp = helix_points(radius=4500, pitch=2200, turns=1.5)
+print(circle_circumference(9000))
+```
+
+### Latest Windows and GIF release
+
+The GitHub Actions release publishes these assets when the build succeeds:
+
+- `QAN-Geometry-Editor.exe` — lightweight Tkinter quad-mesh desktop editor.
+- `QAN-Geometry-Studio.exe` — desktop launcher for the WebGL Studio and Tokyo EVA City observer.
+- `QAN-Tokyo-EVA-City.gif` — 24-frame orbit preview.
+
+Download from [Latest QAN Geometry + Tokyo EVA City Release](https://github.com/ubi-chain/Qan-Geometry-Editor/releases/tag/latest). The Studio and city observer require internet access for public CDN libraries and boundary data. The EXEs are unsigned preview builds.
