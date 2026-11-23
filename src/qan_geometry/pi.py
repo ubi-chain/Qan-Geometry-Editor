@@ -24,8 +24,10 @@ def ring_points(radius: float, segments: int = 360, *, y: float = 0.0, center=(0
     """Sample a circular ring using TAU; optionally repeat the first point."""
     if radius <= 0 or segments < 3:
         raise ValueError("radius must be positive and segments must be at least 3")
-    count = segments + (1 if closed else 0)
-    return [polar(radius, TAU * i / segments, y=y, center=center) for i in range(count)]
+    points = [polar(radius, TAU * i / segments, y=y, center=center) for i in range(segments)]
+    if closed:
+        points.append(points[0])
+    return points
 
 def helix_points(radius: float, pitch: float, turns: float, segments_per_turn: int = 64, *, center=(0.0, 0.0, 0.0)):
     """Sample a parametric helix for ramps and spiral guideways."""
