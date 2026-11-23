@@ -1,4 +1,4 @@
-name: Build QAN Geometry, Studio, Tokyo GIF and Windows releases
+name: Build QAN Geometry, Studio, West Japan + Tokyo GIFs and Windows releases
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
     needs: test
     runs-on: windows-latest
     env:
-      DEMO_VERSION: 0.4.${{ github.run_number }}
+      DEMO_VERSION: 0.6.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -87,16 +87,16 @@ jobs:
           path: dist/*
 
   publish-release:
-    needs: [windows-exe, tokyo-gif]
+    needs: [windows-exe, tokyo-gif, west-japan-gif]
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: QAN-Tokyo-*
+          pattern: QAN-*-GIF
           path: release-assets
           merge-multiple: true
-      - name: Publish Windows apps and Tokyo GIF
+      - name: Publish Windows apps, Tokyo GIF and West Japan GIF
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
@@ -117,4 +117,4 @@ jobs:
             Three.js / TopoJSON CDN data. The Tokyo city scene is stylized: 23-ward
             boundaries are sourced from OpenStreetMap-derived data; buildings, Tama
             relief, island inset and proposed viaducts are observation/concept geometry.
-            Attribution: © OpenStreetMap contributors. See docs/tokyo-eva-city.md.
+            Attribution: © OpenStreetMap contributors. See docs/tokyo-eva-city.md.\n            Also includes the fictional Kyushu-Shikoku-Chugoku QAN PI orbit GIF. See docs/west-japan-neo-world.md.
