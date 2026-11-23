@@ -20,7 +20,7 @@ classifiers = [
 ]
 [project.scripts]
 qan-geometry = "qan_geometry.cli:main"
-qan-geometry-editor = "qan_geometry_editor.app:main"
+qan-geometry-editor = "qan_geometry_editor.app:main"\nqan-geometry-studio = "qan_geometry_editor.studio_launcher:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
