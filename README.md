@@ -2,7 +2,7 @@
 
 Free, quad-first 3D geometry editor and lightweight geometry library using QAN PI concepts. The prototype focuses on editable quad meshes, validation summaries, and exportable reference geometry for a fictional 10 km × 10 km Third-City-inspired environment and a conceptual linear/maglev system.
 
-**Version:** 0.3.0 (prototype)  
+**Version:** 0.6.0 (prototype)  
 **Code license:** MIT  
 **Documentation:** CC BY 4.0  
 **Author:** Independent Developer
@@ -15,7 +15,7 @@ Free, quad-first 3D geometry editor and lightweight geometry library using QAN P
 - Basic topology counts: vertices, quad faces, boundary edges, non-manifold edges.
 - Export to Wavefront OBJ and QAN Geometry JSON.
 - Command-line generator.
-- Browser-based Three.js viewer with animated conceptual maglev train.
+- Browser-based Three.js viewers: Tokyo EVA City and West Japan Neo World with QAN PI orbit observation.
 - Blender-inspired QAN Studio WebGL workspace with scene collection, object tools, transform gizmos, vertex-level Edit Mesh mode, Blender-style G/R/S, Tab, Shift+D, X/Delete and Ctrl shortcuts, Japanese/English/Chinese/Korean UI switching, prompt-based primitive generation, project save/load, GLB/glTF import/export, OBJ and QAN JSON export.
 - Blender add-on: import/export QAN quad-mesh JSON and generate supported geometry from Japanese/English prompts.
 - GitHub Actions workflow builds a Windows x64 executable and Python wheel/sdist artifacts.
