@@ -1,4 +1,4 @@
-name: Build desktop app and Python library
+name: Build QAN Geometry, Studio, Tokyo GIF and Windows releases
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
     needs: test
     runs-on: windows-latest
     env:
-      DEMO_VERSION: 0.1.${{ github.run_number }}
+      DEMO_VERSION: 0.4.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,44 +32,40 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install --upgrade pip build pyinstaller
       - run: python -m pip install .
-      - run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-Geometry-Editor --collect-all qan_geometry src/qan_geometry_editor/app.py
+      - name: Build Geometry Editor desktop executable
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-Geometry-Editor --collect-all qan_geometry src/qan_geometry_editor/app.py
+      - name: Build WebGL Studio desktop launcher
+        shell: pwsh
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-Geometry-Studio --add-data "viewer;viewer" src/qan_geometry_editor/studio_launcher.py
       - name: Write version information
         shell: pwsh
         run: |
-          "QAN Geometry Editor Preview v$env:DEMO_VERSION" | Out-File -FilePath dist/VERSION.txt -Encoding utf8
+          "QAN Geometry Editor + Studio v$env:DEMO_VERSION" | Out-File -FilePath dist/VERSION.txt -Encoding utf8
       - uses: actions/upload-artifact@v4
         with:
-          name: QAN-Geometry-Editor-Demo-v${{ github.run_number }}-Windows-x64
+          name: QAN-Tokyo-Windows-x64
           path: |
             dist/QAN-Geometry-Editor.exe
+            dist/QAN-Geometry-Studio.exe
             dist/VERSION.txt
 
-  publish-windows-release:
-    needs: windows-exe
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+  tokyo-gif:
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          pattern: QAN-Geometry-Editor-Demo-v*-Windows-x64
-          path: release-assets
-          merge-multiple: true
-      - name: Publish latest Windows executable
-        uses: softprops/action-gh-release@v2
+          python-version: "3.12"
+      - run: python -m pip install Pillow
+      - name: Generate Tokyo orbit GIF
+        run: |
+          mkdir -p dist
+          OUTPUT_GIF=dist/QAN-Tokyo-EVA-City.gif python scripts/generate_tokyo_eva_gif.py
+      - uses: actions/upload-artifact@v4
         with:
-          tag_name: latest
-          target_commitish: ${{ github.sha }}
-          name: QAN Geometry Editor - Latest Windows Preview
-          prerelease: true
-          make_latest: false
-          overwrite_files: true
-          files: |
-            release-assets/QAN-Geometry-Editor.exe
-            release-assets/VERSION.txt
-          body: |
-            Windows x64 desktop preview build of QAN Geometry Editor.
-            This executable packages the lightweight Tkinter quad-mesh editor.
-            It is separate from the browser-based Three.js Studio.
+          name: QAN-Tokyo-EVA-City-GIF
+          path: dist/QAN-Tokyo-EVA-City.gif
 
   python-library:
     needs: test
@@ -85,3 +81,36 @@ jobs:
         with:
           name: qan-geometry-python-library
           path: dist/*
+
+  publish-release:
+    needs: [windows-exe, tokyo-gif]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: QAN-Tokyo-*
+          path: release-assets
+          merge-multiple: true
+      - name: Publish Windows apps and Tokyo GIF
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          target_commitish: ${{ github.sha }}
+          name: QAN Geometry + Tokyo EVA City — Latest Windows Preview
+          prerelease: true
+          make_latest: false
+          overwrite_files: true
+          files: |
+            release-assets/QAN-Geometry-Editor.exe
+            release-assets/QAN-Geometry-Studio.exe
+            release-assets/QAN-Tokyo-EVA-City.gif
+            release-assets/VERSION.txt
+          body: |
+            QAN PI Tokyo EVA City concept release.
+            Includes the lightweight quad-mesh desktop editor, the WebGL Studio launcher,
+            and an orbit GIF preview. Studio and city viewer require internet access for
+            Three.js / TopoJSON CDN data. The Tokyo city scene is stylized: 23-ward
+            boundaries are sourced from OpenStreetMap-derived data; buildings, Tama
+            relief, island inset and proposed viaducts are observation/concept geometry.
+            Attribution: © OpenStreetMap contributors. See docs/tokyo-eva-city.md.
