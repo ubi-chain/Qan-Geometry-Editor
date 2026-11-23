@@ -16,7 +16,7 @@ Free, quad-first 3D geometry editor and lightweight geometry library using QAN P
 - Export to Wavefront OBJ and QAN Geometry JSON.
 - Command-line generator.
 - Browser-based Three.js viewer with animated conceptual maglev train.
-- Blender-inspired QAN Studio WebGL workspace with scene collection, object tools, transform gizmos, vertex-level Edit Mesh mode, prompt-based primitive generation, project save/load, GLB/glTF import/export, OBJ and QAN JSON export.
+- Blender-inspired QAN Studio WebGL workspace with scene collection, object tools, transform gizmos, vertex-level Edit Mesh mode, Blender-style G/R/S, Tab, Shift+D, X/Delete and Ctrl shortcuts, Japanese/English/Chinese/Korean UI switching, prompt-based primitive generation, project save/load, GLB/glTF import/export, OBJ and QAN JSON export.
 - Blender add-on: import/export QAN quad-mesh JSON and generate supported geometry from Japanese/English prompts.
 - GitHub Actions workflow builds a Windows x64 executable and Python wheel/sdist artifacts.
 
