@@ -150,3 +150,25 @@ The GitHub Actions release publishes these assets when the build succeeds:
 - `QAN-Tokyo-EVA-City.gif` — 24-frame orbit preview.
 
 Download from [Latest QAN Geometry + Tokyo EVA City Release](https://github.com/ubi-chain/Qan-Geometry-Editor/releases/tag/latest). The Studio and city observer require internet access for public CDN libraries and boundary data. The EXEs are unsigned preview builds.
+
+
+## QAN PI × West Japan Neo World
+
+Open [West Japan Neo World 3D Observer](viewer/west-japan-neo-world.html) for a near-future concept world inspired by **Kyushu, Shikoku and Chugoku**. It includes procedural island silhouettes, instanced city blocks, fictional inter-island maglev corridors, offshore energy structures and a PI-based observation arc. The geography is schematic and the infrastructure is fictional, not a surveyed digital twin or a depiction of existing transport.
+
+- [Open the WebGL observer](viewer/west-japan-neo-world.html)
+- [World design, controls and limitations](docs/west-japan-neo-world.md)
+- [GIF generator](scripts/generate_west_japan_gif.py)
+
+Run `python -m http.server 8000` from the repository root and visit `http://localhost:8000/viewer/west-japan-neo-world.html`. Three.js loads from jsDelivr, so an internet connection is required.
+
+### Combined camera shortcuts
+
+- `G` fly / translation mode; `R` camera rotation mode.
+- Hold `W/A/S/D` to move forward/left/back/right; `Q/E` moves down/up.
+- Hold `X`, `Y`, and/or `Z` together with movement keys to constrain movement to selected world axes.
+- `Shift` accelerates; `Ctrl` provides precision movement.
+- In rotation mode, WASD rotates yaw/pitch and Q/E rolls the camera.
+- Right numeric keypad: `7` top, `Ctrl+7` bottom, `1` front, `Ctrl+1` back, `3` right, `Ctrl+3` left, `9` opposite oblique, `5` perspective toggle; `2/4/6/8` orbit in 15-degree steps.
+
+Generate the orbit GIF locally with `python -m pip install Pillow` then `python scripts/generate_west_japan_gif.py`. GitHub Actions also creates the GIF as a release asset when the build completes.
