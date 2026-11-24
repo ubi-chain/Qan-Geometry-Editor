@@ -127,14 +127,68 @@ class QAN_PT_panel(Panel):
         layout.label(text="QAN JSON / Blender")
         layout.operator("qan.import_json",icon="IMPORT")
         layout.operator("qan.export_json",icon="EXPORT")
-        layout.separator(); layout.label(text="Prompt to Quad Mesh")
+        layout.separator(); layout.label(text="Quick Add")\n        row = layout.row(align=True)\n        op = row.operator("qan.quick_add", text="Cube"); op.kind = "CUBE"\n        op = row.operator("qan.quick_add", text="Sphere"); op.kind = "SPHERE"\n        row = layout.row(align=True)\n        op = row.operator("qan.quick_add", text="Plane"); op.kind = "PLANE"\n        op = row.operator("qan.quick_add", text="Quad Grid"); op.kind = "GRID"\n        layout.separator()\n        layout.operator("qan.apply_transforms", icon="OBJECT_ORIGIN")\n        layout.operator("qan.add_bevel", icon="MOD_BEVEL")\n        layout.operator("qan.add_subdivision", icon="MOD_SUBSURF")\n        layout.operator("qan.smooth_shading", icon="SHADING_RENDERED")\n        layout.separator(); layout.label(text="Prompt to Quad Mesh")
         layout.prop(context.scene,"qan_prompt_text",text="")
         layout.operator("qan.generate_from_prompt",icon="OUTLINER_OB_MESH")
         layout.label(text="Examples: 10m cube")
         layout.label(text="10km city grid 40x40")
         layout.label(text="1km maglev guideway segments 30")
 
-classes=(QAN_OT_import,QAN_OT_export,QAN_OT_prompt,QAN_PT_panel)
+
+class QAN_OT_quick_add(Operator):
+    bl_idname = "qan.quick_add"; bl_label = "Add Quick Primitive"
+    kind: bpy.props.EnumProperty(items=[("CUBE","Cube",""),("SPHERE","UV Sphere",""),("PLANE","Plane",""),("GRID","Quad Grid","")])
+    def execute(self, context):
+        if self.kind == "CUBE": bpy.ops.mesh.primitive_cube_add(size=2)
+        elif self.kind == "SPHERE": bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16)
+        elif self.kind == "PLANE": bpy.ops.mesh.primitive_plane_add(size=2)
+        else:
+            bpy.ops.mesh.primitive_grid_add(x_subdivisions=21, y_subdivisions=21, size=10)
+        context.object.name = "QAN_" + self.kind.title()
+        return {"FINISHED"}
+
+class QAN_OT_apply_transforms(Operator):
+    bl_idname = "qan.apply_transforms"; bl_label = "Apply Location / Rotation / Scale"
+    def execute(self, context):
+        selected = [o for o in context.selected_objects if o.type == "MESH"]
+        if not selected:
+            self.report({"WARNING"}, "Select one or more mesh objects"); return {"CANCELLED"}
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        self.report({"INFO"}, f"Applied transforms to {len(selected)} object(s)")
+        return {"FINISHED"}
+
+class QAN_OT_add_bevel(Operator):
+    bl_idname = "qan.add_bevel"; bl_label = "Add Bevel Modifier"
+    width: bpy.props.FloatProperty(name="Width", default=0.08, min=0.0, max=10.0)
+    segments: bpy.props.IntProperty(name="Segments", default=3, min=1, max=12)
+    def execute(self, context):
+        obj = context.active_object
+        if not obj or obj.type != "MESH":
+            self.report({"WARNING"}, "Select a mesh object"); return {"CANCELLED"}
+        mod = obj.modifiers.new("QAN_Bevel", "BEVEL")
+        mod.width = self.width; mod.segments = self.segments
+        return {"FINISHED"}
+
+class QAN_OT_add_subdivision(Operator):
+    bl_idname = "qan.add_subdivision"; bl_label = "Add Subdivision Surface"
+    levels: bpy.props.IntProperty(name="Viewport Levels", default=1, min=1, max=4)
+    def execute(self, context):
+        obj = context.active_object
+        if not obj or obj.type != "MESH":
+            self.report({"WARNING"}, "Select a mesh object"); return {"CANCELLED"}
+        mod = obj.modifiers.new("QAN_Subdivision", "SUBSURF")
+        mod.levels = self.levels; mod.render_levels = self.levels
+        return {"FINISHED"}
+
+class QAN_OT_smooth_shading(Operator):
+    bl_idname = "qan.smooth_shading"; bl_label = "Shade Smooth"
+    def execute(self, context):
+        for obj in context.selected_objects:
+            if obj.type == "MESH":
+                for poly in obj.data.polygons: poly.use_smooth = True
+        return {"FINISHED"}
+
+\nclasses=(QAN_OT_import,QAN_OT_export,QAN_OT_prompt,QAN_OT_quick_add,QAN_OT_apply_transforms,QAN_OT_add_bevel,QAN_OT_add_subdivision,QAN_OT_smooth_shading,QAN_PT_panel)
 def register():
     for cls in classes: bpy.utils.register_class(cls)
     bpy.types.Scene.qan_prompt_text=StringProperty(name="Geometry Prompt",default="10km city grid 40x40",
