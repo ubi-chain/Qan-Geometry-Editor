@@ -20,9 +20,22 @@ button:hover,button.active{background:#14506a}
 <div class="hud status">WORLD BUILD v0.2<br><span id="fps">60 FPS</span><br>TEXTURE + MOTION + 3D SCENE</div>
 <div class="hud bottom">DRAG: ORBIT　 WHEEL: ZOOM　 RIGHT DRAG: PAN　 DOUBLE-CLICK: RESET VIEW</div>
 <div class="panel"><button id="motion" class="active">MOTION: ON</button><button id="labels">LABELS: ON</button><button id="reset">RESET VIEW</button></div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+<script>
+window.addEventListener('error',function(e){
+ const el=document.querySelector('#loading');
+ if(el){el.textContent='OZ WORLD ERROR: '+(e.message||'3D module failed to load')+' — check internet / WebGL support';el.style.color='#ff9b9b';}
+});
+window.addEventListener('unhandledrejection',function(e){
+ const el=document.querySelector('#loading');
+ if(el){el.textContent='OZ WORLD ERROR: '+String(e.reason||'module initialization failed');el.style.color='#ff9b9b';}
+});
+</script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 const host=document.querySelector('#view'),scene=new THREE.Scene();scene.background=new THREE.Color(0x07101d);scene.fog=new THREE.FogExp2(0x07101d,.00165);
 const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,3000);camera.position.set(390,310,510);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;host.appendChild(renderer.domElement);
