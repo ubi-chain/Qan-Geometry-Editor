@@ -1,7 +1,7 @@
 bl_info = {
     "name": "QAN Geometry Tools",
     "author": "Independent Developer",
-    "version": (0, 2, 0),
+    "version": (0, 3, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > QAN",
     "description": "Import/export QAN quad meshes and generate geometry from constrained prompts",
