@@ -172,3 +172,8 @@ Run `python -m http.server 8000` from the repository root and visit `http://loca
 - Right numeric keypad: `7` top, `Ctrl+7` bottom, `1` front, `Ctrl+1` back, `3` right, `Ctrl+3` left, `9` opposite oblique, `5` perspective toggle; `2/4/6/8` orbit in 15-degree steps.
 
 Generate the orbit GIF locally with `python -m pip install Pillow` then `python scripts/generate_west_japan_gif.py`. GitHub Actions also creates the GIF as a release asset when the build completes.
+
+
+## Blender quick-tools starter set
+
+The QAN Blender add-on includes quick primitive creation (cube, UV sphere, plane and quad grid), apply transforms, bevel modifier, subdivision-surface modifier, and smooth shading, alongside QAN JSON import/export and constrained prompt-to-mesh generation. Install `blender/qan_geometry_addon.py` from Blender Preferences → Add-ons → Install from Disk, then use the QAN tab in the 3D Viewport sidebar. These are a small native Blender starter set, not a bundle of third-party plugins.
