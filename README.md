@@ -120,6 +120,10 @@ A procedural Three.js scene reconstructs the supplied sunset-city wallpaper as e
 Run `python -m http.server 8000` from the repository root and visit `http://localhost:8000/viewer/wallpaper-3d.html`. The page loads Three.js from jsDelivr, so an internet connection is required. This is a stylized interpretation from one 2D image; hidden surfaces and exact depth are inferred, not photogrammetrically recovered.
 
 
+## Geometry Studio 0.7 — Blender-inspired workflow
+
+The browser-based Studio now includes a Blender-inspired starter set of everyday operations: modal G/R/S transforms with numeric input and X/Y/Z constraints, Numpad orthographic-style views, quick cube add, hide/reveal, Apply Transforms, Origin to Geometry, smooth/flat shading, Mirror X Copy and Array ×3. These are lightweight QAN implementations, not bundled third-party add-ons or a full Blender modifier stack. See [Studio controls and limitations](docs/studio-editor.md).
+
 ## Windows executable
 
 A Windows x64 desktop preview build is published from GitHub Actions. After a successful `main` build, download `QAN-Geometry-Editor.exe` from the [latest Windows preview release](https://github.com/ubi-chain/Qan-Geometry-Editor/releases/tag/latest). This desktop executable packages the lightweight Tkinter quad-mesh editor (`src/qan_geometry_editor/app.py`); it is separate from the browser-based Three.js Studio at `viewer/editor.html`. The first launch may be flagged by Windows SmartScreen because the build is not code-signed.
