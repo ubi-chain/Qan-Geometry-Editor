@@ -72,6 +72,63 @@ const floor=new THREE.Mesh(new THREE.CircleGeometry(92,64),new THREE.MeshStandar
 for(let i=0;i<5;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(100-i*5,2.4,8,96),i%2?gold:cyan);ring.rotation.x=Math.PI/2;ring.position.y=15+i*9;arena.add(ring)}
 const roof=new THREE.Mesh(new THREE.TorusGeometry(94,5,12,96),white);roof.rotation.x=Math.PI/2;roof.position.y=57;arena.add(roof);
 const roofDisc=new THREE.Mesh(new THREE.CylinderGeometry(62,75,4,64,1,true),glass);roofDisc.position.y=59;arena.add(roofDisc);
+// OZ_AVATAR_CROWD_V1 — textured low-poly avatars gathered in the public plaza.
+function makeAvatarFabric(base,accent,mark){
+ const c=document.createElement('canvas');c.width=256;c.height=256;const x=c.getContext('2d');
+ x.fillStyle=base;x.fillRect(0,0,256,256);
+ x.fillStyle=accent;x.fillRect(0,0,256,48);x.fillRect(0,208,256,48);
+ x.strokeStyle='rgba(255,255,255,.28)';x.lineWidth=5;
+ for(let k=0;k<6;k++){x.beginPath();x.moveTo(k*52-30,55);x.lineTo(k*52+65,200);x.stroke()}
+ x.fillStyle=mark;x.beginPath();x.arc(128,128,32,0,Math.PI*2);x.fill();
+ x.fillStyle='#f4fbff';x.font='bold 24px sans-serif';x.textAlign='center';x.fillText('OZ',128,136);
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;
+}
+const avatarPalettes=[
+ ['#267caa','#58d8ef','#102b49'],['#b94f75','#f6a6b8','#58223c'],
+ ['#4b986f','#a8e2a7','#214c39'],['#9a7441','#e9c77c','#4a3422'],
+ ['#6259a8','#b3aaff','#28234f'],['#b7c5d1','#f4fbff','#3c5b72'],
+ ['#d06a35','#ffc17c','#66321c'],['#287f83','#80e1d7','#17464b']
+];
+const avatarMats=avatarPalettes.map(p=>new THREE.MeshStandardMaterial({map:makeAvatarFabric(...p),roughness:.78}));
+const skinTones=[0xf1c7a5,0xd99d78,0x9b674c,0xf0d4bd,0xb77e60,0xe5b18d];
+const hairTones=[0x202735,0x51352b,0x9b7046,0x29202a,0xadb9c4,0x6b2938];
+const avatarSkin=skinTones.map(color=>new THREE.MeshStandardMaterial({color,roughness:.9}));
+const avatarHair=hairTones.map(color=>new THREE.MeshStandardMaterial({color,roughness:.92}));
+const avatarLimb=new THREE.MeshStandardMaterial({color:0x26384c,roughness:.85});
+function makeAvatar(index){
+ const g=new THREE.Group(),palette=index%avatarMats.length,skin=index%avatarSkin.length,hair=(index*3)%avatarHair.length;
+ const torso=new THREE.Mesh(new THREE.BoxGeometry(.78,.92,.42),avatarMats[palette]);torso.position.y=1.48;g.add(torso);
+ const neck=new THREE.Mesh(new THREE.CylinderGeometry(.12,.14,.16,8),avatarSkin[skin]);neck.position.y=2.0;g.add(neck);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.29,12,10),avatarSkin[skin]);head.scale.set(.9,1.12,.9);head.position.y=2.28;g.add(head);
+ const cap=new THREE.Mesh(new THREE.SphereGeometry(.30,12,8,0,Math.PI*2,0,Math.PI*.55),avatarHair[hair]);cap.position.set(0,2.38,-.015);g.add(cap);
+ const armGeo=new THREE.CapsuleGeometry(.105,.48,3,6);
+ for(const side of [-1,1]){const arm=new THREE.Mesh(armGeo,avatarSkin[skin]);arm.position.set(side*.49,1.48,0);arm.rotation.z=side*-.12;g.add(arm);
+ const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.13,.48,3,6),avatarLimb);leg.position.set(side*.2,.58,0);g.add(leg);
+ const shoe=new THREE.Mesh(new THREE.BoxGeometry(.27,.13,.42),dark);shoe.position.set(side*.2,.12,.07);g.add(shoe)}
+ const eyeMat=new THREE.MeshBasicMaterial({color:0x182433});
+ for(const side of [-1,1]){const eye=new THREE.Mesh(new THREE.SphereGeometry(.027,6,6),eyeMat);eye.position.set(side*.095,2.30,.252);g.add(eye)}
+ g.scale.setScalar(.9+(index%4)*.055);return g;
+}
+const avatarCrowd=new THREE.Group();avatarCrowd.name='OZ Textured Avatar Gathering';world.add(avatarCrowd);
+const plaza=new THREE.Mesh(new THREE.CylinderGeometry(72,78,1.5,48),new THREE.MeshStandardMaterial({color:0x18364a,metalness:.3,roughness:.6}));
+plaza.position.set(72,.2,125);avatarCrowd.add(plaza);
+const plazaRing=new THREE.Mesh(new THREE.TorusGeometry(74,1.5,8,96),cyan);plazaRing.rotation.x=Math.PI/2;plazaRing.position.set(72,1.2,125);avatarCrowd.add(plazaRing);
+let avatarId=0;
+for(let row=0;row<6;row++){
+ for(let col=0;col<8;col++){
+  const a=makeAvatar(avatarId++),x=38+col*9.5+(row%2)*3.5,z=91+row*10;
+  a.position.set(x,1.1,z);a.rotation.y=Math.PI+(col%3-1)*.22;avatarCrowd.add(a);
+ }
+}
+// A smaller audience cluster gathers along the arena promenade.
+for(let i=0;i<18;i++){
+ const a=makeAvatar(avatarId++),angle=(i/18)*Math.PI*2;
+ a.position.set(185+Math.cos(angle)*119,1.1,18+Math.sin(angle)*119);
+ a.rotation.y=-angle+Math.PI/2;avatarCrowd.add(a);
+}
+const avatarLabel=label('OZ AVATAR PLAZA / COMMUNITY HUB');
+avatarLabel.position.set(72,20,125);world.add(avatarLabel);
+
 // District towers with procedural emissive façade texture.
 const rand=(a,b)=>a+Math.random()*(b-a);
 for(let i=0;i<68;i++){const a=rand(0,Math.PI*2),r=rand(135,285),h=rand(24,105),w=rand(9,20);const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),cityMat);b.position.set(Math.cos(a)*r,h/2,Math.sin(a)*r);b.rotation.y=rand(-.18,.18);world.add(b);const cap=new THREE.Mesh(new THREE.BoxGeometry(w*1.1,2,w*1.1),i%6===0?gold:cyan);cap.position.set(b.position.x,h+1,b.position.z);world.add(cap)}
