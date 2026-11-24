@@ -1,0 +1,40 @@
+name: Deploy OZ WebGL demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "viewer/oz-main-area-sports-arena.html"
+      - ".github/workflows/deploy-oz-webgl.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: oz-webgl-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare website
+        run: |
+          mkdir -p site
+          cp viewer/oz-main-area-sports-arena.html site/index.html
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
