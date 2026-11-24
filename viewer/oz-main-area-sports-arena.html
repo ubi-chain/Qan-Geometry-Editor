@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OZ MAIN AREA × SPORTS ARENA — DEMO v0.2</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07101d;color:#eaf5ff;font:14px/1.4 "Segoe UI",sans-serif}
+#view{position:fixed;inset:0}canvas{display:block}
+.hud{position:fixed;z-index:2;pointer-events:none;text-shadow:0 1px 8px #000}
+.top{top:18px;left:22px}.top h1{font-size:clamp(17px,2vw,25px);letter-spacing:.12em;margin:0}.top p{margin:5px 0;color:#8bbbd4;font-size:11px;letter-spacing:.18em}
+.status{top:20px;right:22px;text-align:right;color:#8ddfff;font:11px monospace;letter-spacing:.12em}
+.bottom{left:22px;bottom:18px;color:#9db7cb;font-size:11px}
+.panel{position:fixed;z-index:3;right:18px;bottom:18px;display:flex;gap:7px;pointer-events:auto}
+button{border:1px solid #2b7591;background:#071b2acc;color:#dff8ff;padding:9px 12px;border-radius:4px;cursor:pointer;font:11px monospace;letter-spacing:.08em}
+button:hover,button.active{background:#14506a}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:#07101d;z-index:5;color:#9eeaff;font:12px monospace;letter-spacing:.2em}
+</style></head>
+<body><div id="view"></div><div id="loading">INITIALIZING OZ WORLD SYSTEM…</div>
+<div class="hud top"><h1>OZ MAIN AREA × SPORTS ARENA</h1><p>VIRTUAL ECONOMY / SOCIAL HUB / LIVE EVENT DISTRICT</p></div>
+<div class="hud status">WORLD BUILD v0.2<br><span id="fps">60 FPS</span><br>TEXTURE + MOTION + 3D SCENE</div>
+<div class="hud bottom">DRAG: ORBIT　 WHEEL: ZOOM　 RIGHT DRAG: PAN　 DOUBLE-CLICK: RESET VIEW</div>
+<div class="panel"><button id="motion" class="active">MOTION: ON</button><button id="labels">LABELS: ON</button><button id="reset">RESET VIEW</button></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+const host=document.querySelector('#view'),scene=new THREE.Scene();scene.background=new THREE.Color(0x07101d);scene.fog=new THREE.FogExp2(0x07101d,.00165);
+const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,3000);camera.position.set(390,310,510);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;host.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.06;controls.target.set(0,55,0);controls.minDistance=100;controls.maxDistance=1100;
+scene.add(new THREE.HemisphereLight(0x9bdfff,0x101b37,2.0));const key=new THREE.DirectionalLight(0xffffff,2.2);key.position.set(-260,420,180);scene.add(key);
+const cyan=new THREE.MeshStandardMaterial({color:0x31c9f4,metalness:.65,roughness:.24,emissive:0x087da8,emissiveIntensity:.55});
+const glass=new THREE.MeshPhysicalMaterial({color:0x173e61,metalness:.45,roughness:.16,transparent:true,opacity:.88,clearcoat:1});
+const dark=new THREE.MeshStandardMaterial({color:0x101f35,metalness:.55,roughness:.34});
+const gold=new THREE.MeshStandardMaterial({color:0xffc76a,metalness:.5,roughness:.28,emissive:0x6b3100,emissiveIntensity:.3});
+const white=new THREE.MeshStandardMaterial({color:0xd8f5ff,metalness:.4,roughness:.25,emissive:0x2a789a,emissiveIntensity:.2});
+// Canvas-generated high-resolution architectural atlas texture.
+function makeTexture(kind){const c=document.createElement('canvas');c.width=1024;c.height=1024;const x=c.getContext('2d');
+x.fillStyle=kind==='arena'?'#102f4a':'#091d32';x.fillRect(0,0,1024,1024);
+for(let y=0;y<1024;y+=32){x.strokeStyle=y%128===0?'rgba(76,220,255,.48)':'rgba(55,145,190,.19)';x.lineWidth=y%128===0?2:1;x.beginPath();x.moveTo(0,y);x.lineTo(1024,y);x.stroke()}
+for(let i=0;i<220;i++){let xx=(i*137)%1024,yy=(i*271)%1024;x.fillStyle=i%5===0?'rgba(255,191,92,.85)':'rgba(87,225,255,.62)';x.fillRect(xx,yy,5+(i%4)*2,8+(i%7)*3)}
+for(let i=0;i<12;i++){x.strokeStyle='rgba(87,225,255,.24)';x.lineWidth=3;x.beginPath();x.arc(512,512,80+i*35,0,Math.PI*2);x.stroke()}
+const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t}
+const cityTex=makeTexture('city'),arenaTex=makeTexture('arena');
+const cityMat=new THREE.MeshStandardMaterial({map:cityTex,color:0xb9eaff,metalness:.48,roughness:.36,emissive:0x08263d,emissiveMap:cityTex,emissiveIntensity:.42});
+const arenaMat=new THREE.MeshStandardMaterial({map:arenaTex,color:0xc6f1ff,metalness:.35,roughness:.3,emissive:0x06334b,emissiveMap:arenaTex,emissiveIntensity:.55,side:THREE.DoubleSide});
+const world=new THREE.Group();scene.add(world);
+const ground=new THREE.Mesh(new THREE.CylinderGeometry(310,330,12,128),dark);ground.position.y=-8;world.add(ground);
+const grid=new THREE.GridHelper(620,62,0x1c8cb5,0x15354c);grid.position.y=-1;world.add(grid);
+// Central OZ economy / communication tower.
+const tower=new THREE.Group();tower.position.set(-12,0,0);world.add(tower);
+const base=new THREE.Mesh(new THREE.CylinderGeometry(39,48,24,12),dark);base.position.y=12;tower.add(base);
+for(let i=0;i<5;i++){const r=31-i*4.1,h=36+i*10;const m=new THREE.Mesh(new THREE.CylinderGeometry(r*.82,r,h,12),i%2?glass:cityMat);m.position.y=34+i*26;tower.add(m)}
+const spire=new THREE.Mesh(new THREE.CylinderGeometry(1.2,5,95,8),cyan);spire.position.y=205;tower.add(spire);
+const crown=new THREE.Mesh(new THREE.TorusGeometry(36,2.3,10,96),cyan);crown.rotation.x=Math.PI/2;crown.position.y=116;tower.add(crown);
+// Sports arena, eastern district, bowl with tier rings and roof truss.
+const arena=new THREE.Group();arena.position.set(185,0,18);world.add(arena);
+const bowl=new THREE.Mesh(new THREE.CylinderGeometry(94,108,40,64,1,true),arenaMat);bowl.position.y=26;arena.add(bowl);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(92,64),new THREE.MeshStandardMaterial({color:0x173c56,metalness:.25,roughness:.5}));floor.rotation.x=-Math.PI/2;floor.position.y=7;arena.add(floor);
+for(let i=0;i<5;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(100-i*5,2.4,8,96),i%2?gold:cyan);ring.rotation.x=Math.PI/2;ring.position.y=15+i*9;arena.add(ring)}
+const roof=new THREE.Mesh(new THREE.TorusGeometry(94,5,12,96),white);roof.rotation.x=Math.PI/2;roof.position.y=57;arena.add(roof);
+const roofDisc=new THREE.Mesh(new THREE.CylinderGeometry(62,75,4,64,1,true),glass);roofDisc.position.y=59;arena.add(roofDisc);
+// District towers with procedural emissive façade texture.
+const rand=(a,b)=>a+Math.random()*(b-a);
+for(let i=0;i<68;i++){const a=rand(0,Math.PI*2),r=rand(135,285),h=rand(24,105),w=rand(9,20);const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),cityMat);b.position.set(Math.cos(a)*r,h/2,Math.sin(a)*r);b.rotation.y=rand(-.18,.18);world.add(b);const cap=new THREE.Mesh(new THREE.BoxGeometry(w*1.1,2,w*1.1),i%6===0?gold:cyan);cap.position.set(b.position.x,h+1,b.position.z);world.add(cap)}
+// Sky bridges / orbital pedestrian and transit loops.
+const rings=[];for(const [radius,y,tube,material] of [[142,46,2.8,cyan],[222,28,2.1,gold],[282,18,1.4,cyan]]){const g=new THREE.Mesh(new THREE.TorusGeometry(radius,tube,8,180),material);g.rotation.x=Math.PI/2;g.position.y=y;world.add(g);rings.push(g)}
+for(let i=0;i<12;i++){const a=i*Math.PI/6;const bridge=new THREE.Mesh(new THREE.BoxGeometry(115,3,8),glass);bridge.position.set(Math.cos(a)*135,43,Math.sin(a)*135);bridge.rotation.y=-a;world.add(bridge)}
+// Animated luminous traffic capsules circulate on the inner ring.
+const traffic=[];for(let i=0;i<18;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(7,3,4),i%3===0?gold:white);world.add(m);traffic.push({mesh:m,phase:i/18*Math.PI*2,r:142})}
+const pulses=[];for(let i=0;i<6;i++){const p=new THREE.Mesh(new THREE.TorusGeometry(105+i*8,1.1,6,96),cyan);p.rotation.x=Math.PI/2;p.position.set(185,60+i*2,18);arena.add(p);pulses.push(p)}
+// Floating UI-like district labels are generated as canvas sprites.
+function label(text,color='#8feaff'){const c=document.createElement('canvas');c.width=512;c.height=96;const x=c.getContext('2d');x.fillStyle='rgba(4,20,36,.72)';x.fillRect(0,0,512,96);x.strokeStyle=color;x.lineWidth=3;x.strokeRect(2,2,508,92);x.font='bold 32px Segoe UI';x.fillStyle=color;x.fillText(text,22,60);const t=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false}));s.scale.set(92,17,1);return s}
+const labels=[];for(const [txt,pos] of [['OZ ECONOMY / MAIN CORE',[-12,235,0]],['SPORTS ARENA / LIVE EVENT',[185,100,18]],['SOCIAL & COMMERCE DISTRICT',[-115,90,145]],['TRANSIT RING / SKYWAY',[0,75,-190]]]){const l=label(txt);l.position.set(...pos);world.add(l);labels.push(l)}
+let moving=true,showLabels=true,last=performance.now(),frames=0,fpsAt=last;
+function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;frames++;
+if(moving){tower.rotation.y+=dt*.13;arena.rotation.y+=dt*.018;rings.forEach((r,i)=>r.rotation.z+=(i%2?1:-1)*dt*(.045+i*.018));traffic.forEach(o=>{const a=now*.00022+o.phase;o.mesh.position.set(Math.cos(a)*o.r,47+Math.sin(a*2)*2,Math.sin(a)*o.r)});pulses.forEach((p,i)=>{p.rotation.z+=dt*(i%2?-.22:.18);p.material.emissiveIntensity=.25+Math.sin(now*.002+i)*.2});cityTex.offset.x=(now*.000012)%1;arenaTex.offset.y=(now*.00001)%1}
+controls.update();renderer.render(scene,camera);if(now-fpsAt>1000){document.querySelector('#fps').textContent=Math.round(frames*1000/(now-fpsAt))+' FPS';frames=0;fpsAt=now}}
+requestAnimationFrame(animate);
+document.querySelector('#motion').onclick=e=>{moving=!moving;e.target.textContent='MOTION: '+(moving?'ON':'OFF');e.target.classList.toggle('active',moving)};
+document.querySelector('#labels').onclick=e=>{showLabels=!showLabels;labels.forEach(x=>x.visible=showLabels);e.target.textContent='LABELS: '+(showLabels?'ON':'OFF');e.target.classList.toggle('active',showLabels)};
+function reset(){camera.position.set(390,310,510);controls.target.set(0,55,0);controls.update()}document.querySelector('#reset').onclick=reset;renderer.domElement.addEventListener('dblclick',reset);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+document.querySelector('#loading').remove();
+</script></body></html>
