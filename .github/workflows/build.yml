@@ -114,9 +114,12 @@ jobs:
           pattern: QAN-*
           path: release-assets
           merge-multiple: true
-      - name: Publish Windows apps, Tokyo GIF and West Japan GIF
+      - name: Publish Windows apps and regional GIFs
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: latest
           target_commitish: ${{ github.sha }}
           name: QAN Geometry + Tokyo EVA City — Latest Windows Preview
@@ -127,6 +130,7 @@ jobs:
             release-assets/QAN-Geometry-Editor.exe
             release-assets/QAN-Geometry-Studio.exe
             release-assets/QAN-Tokyo-EVA-City.gif
+            release-assets/QAN-West-Japan-Neo-World.gif
             release-assets/VERSION.txt
           body: |
             QAN PI Tokyo EVA City concept release.
