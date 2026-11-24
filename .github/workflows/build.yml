@@ -41,7 +41,10 @@ jobs:
       - name: Build WebGL Studio desktop launcher
         shell: pwsh
         run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-Geometry-Studio --add-data "viewer;viewer" src/qan_geometry_editor/studio_launcher.py
-      - name: Build standalone OZ World launcher\n        shell: pwsh\n        run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-OZ-World --add-data "viewer;viewer" src/qan_geometry_editor/oz_launcher.py\n      - name: Write version information
+      - name: Build standalone OZ World launcher
+        shell: pwsh
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-OZ-World --add-data "viewer;viewer" src/qan_geometry_editor/oz_launcher.py
+      - name: Write version information
         shell: pwsh
         run: |
           "QAN Geometry Editor + Studio v$env:DEMO_VERSION" | Out-File -FilePath dist/VERSION.txt -Encoding utf8
@@ -51,6 +54,7 @@ jobs:
           path: |
             dist/QAN-Geometry-Editor.exe
             dist/QAN-Geometry-Studio.exe
+            dist/QAN-OZ-World.exe
             dist/VERSION.txt
 
   tokyo-gif:
@@ -129,14 +133,18 @@ jobs:
           files: |
             release-assets/QAN-Geometry-Editor.exe
             release-assets/QAN-Geometry-Studio.exe
+            release-assets/QAN-OZ-World.exe
             release-assets/QAN-Tokyo-EVA-City.gif
             release-assets/QAN-West-Japan-Neo-World.gif
             release-assets/VERSION.txt
           body: |
-            QAN Geometry, OZ Virtual World and regional concept-scene preview release.\n            Includes QAN-OZ-World.exe: integrated OZ main-area and sports-arena 3D scene.\n            See docs/oz-main-area-sports-arena.md.
+            QAN Geometry, OZ Virtual World and regional concept-scene preview release.
+            Includes QAN-OZ-World.exe: integrated OZ main-area and sports-arena 3D scene.
+            See docs/oz-main-area-sports-arena.md.
             Includes the lightweight quad-mesh desktop editor, the WebGL Studio launcher,
             and an orbit GIF preview. Studio and city viewer require internet access for
             Three.js / TopoJSON CDN data. The Tokyo city scene is stylized: 23-ward
             boundaries are sourced from OpenStreetMap-derived data; buildings, Tama
             relief, island inset and proposed viaducts are observation/concept geometry.
-            Attribution: © OpenStreetMap contributors. See docs/tokyo-eva-city.md.\n            Also includes the fictional Kyushu-Shikoku-Chugoku QAN PI orbit GIF. See docs/west-japan-neo-world.md.
+            Attribution: © OpenStreetMap contributors. See docs/tokyo-eva-city.md.
+            Also includes the fictional Kyushu-Shikoku-Chugoku QAN PI orbit GIF. See docs/west-japan-neo-world.md.
