@@ -181,3 +181,15 @@ Generate the orbit GIF locally with `python -m pip install Pillow` then `python 
 ## Blender quick-tools starter set
 
 The QAN Blender add-on includes quick primitive creation (cube, UV sphere, plane and quad grid), apply transforms, bevel modifier, subdivision-surface modifier, and smooth shading, alongside QAN JSON import/export and constrained prompt-to-mesh generation. Install `blender/qan_geometry_addon.py` from Blender Preferences → Add-ons → Install from Disk, then use the QAN tab in the 3D Viewport sidebar. These are a small native Blender starter set, not a bundle of third-party plugins.
+
+
+## OZ MAIN AREA × SPORTS ARENA — DEMO v0.2
+
+An integrated Three.js virtual-world scene combining the OZ economy / social main area with a large sports and live-event arena. The scene unifies its procedural 3D geometry, canvas-generated architectural textures and real-time animation: central OZ tower, arena bowl and roof, illuminated district towers, sky bridges, orbital transit rings, moving traffic capsules and animated arena pulse rings.
+
+- [Open OZ 3D WebGL demo](viewer/oz-main-area-sports-arena.html)
+- [Design, controls and limitations](docs/oz-main-area-sports-arena.md)
+- Controls: left-drag orbit, wheel zoom, right-drag pan, double-click reset; MOTION and LABELS toggles.
+- Windows launcher: `QAN-OZ-World.exe` (built by GitHub Actions and included in the latest release after a successful workflow).
+
+Run `python -m http.server 8000` from the repository root and open `http://localhost:8000/viewer/oz-main-area-sports-arena.html`. Three.js and OrbitControls load from jsDelivr, so an internet connection is required. This is a procedural fan-concept scene, not an official or surveyed reconstruction.
