@@ -41,7 +41,7 @@ jobs:
       - name: Build WebGL Studio desktop launcher
         shell: pwsh
         run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-Geometry-Studio --add-data "viewer;viewer" src/qan_geometry_editor/studio_launcher.py
-      - name: Write version information
+      - name: Build standalone OZ World launcher\n        shell: pwsh\n        run: pyinstaller --noconfirm --clean --onefile --windowed --name QAN-OZ-World --add-data "viewer;viewer" src/qan_geometry_editor/oz_launcher.py\n      - name: Write version information
         shell: pwsh
         run: |
           "QAN Geometry Editor + Studio v$env:DEMO_VERSION" | Out-File -FilePath dist/VERSION.txt -Encoding utf8
@@ -122,7 +122,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: latest
           target_commitish: ${{ github.sha }}
-          name: QAN Geometry + Tokyo EVA City — Latest Windows Preview
+          name: QAN Geometry + OZ Virtual World — Latest Windows Preview
           prerelease: true
           make_latest: false
           overwrite_files: true
@@ -133,7 +133,7 @@ jobs:
             release-assets/QAN-West-Japan-Neo-World.gif
             release-assets/VERSION.txt
           body: |
-            QAN PI Tokyo EVA City concept release.
+            QAN Geometry, OZ Virtual World and regional concept-scene preview release.\n            Includes QAN-OZ-World.exe: integrated OZ main-area and sports-arena 3D scene.\n            See docs/oz-main-area-sports-arena.md.
             Includes the lightweight quad-mesh desktop editor, the WebGL Studio launcher,
             and an orbit GIF preview. Studio and city viewer require internet access for
             Three.js / TopoJSON CDN data. The Tokyo city scene is stylized: 23-ward
