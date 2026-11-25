@@ -193,3 +193,16 @@ An integrated Three.js virtual-world scene combining the OZ economy / social mai
 - Windows launcher: `QAN-OZ-World.exe` (built by GitHub Actions and included in the latest release after a successful workflow).
 
 Run `python -m http.server 8000` from the repository root and open `http://localhost:8000/viewer/oz-main-area-sports-arena.html`. Three.js and OrbitControls load from jsDelivr, so an internet connection is required. This is a procedural fan-concept scene, not an official or surveyed reconstruction.
+
+## GEO STUDIO — Social Rehabilitation concept
+
+A beginner-friendly concept for connecting 3D regional maps with community learning, SST practice, and access to local support. The social rehabilitation modules are a proposed development direction; they are not a currently certified medical or welfare service.
+
+- [Open the easy Japanese user guide](docs/social-rehabilitation-quickstart.md)
+- GEO WORLD: explore public regional maps and community resources.
+- VIRTUAL DAYCARE: proposed online group and community activity spaces.
+- SST LAB: proposed practice for conversation, problem-solving, and daily-life skills.
+- LEARNING / RURAL WORK: proposed IT, 3D, agriculture, and local-learning activities.
+- SUPPORT NETWORK: proposed directory and referral links to qualified local services.
+
+The design prioritizes low-bandwidth access, 2D fallback, optional audio/text participation, privacy, consent, and the ability to pause or leave activities. It does not provide diagnosis, treatment, emergency response, or replace in-person professional support. Any real medical or disability-welfare service must be operated by an appropriately licensed/designated provider and meet the applicable staffing, privacy, safety, and reimbursement requirements.
